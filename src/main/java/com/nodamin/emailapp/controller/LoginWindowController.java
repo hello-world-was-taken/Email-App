@@ -3,7 +3,7 @@ package com.nodamin.emailapp.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
-public class HelloController {
+public class LoginWindowController {
     @FXML
     private Label welcomeText;
 
