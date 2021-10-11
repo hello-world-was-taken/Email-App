@@ -7,6 +7,8 @@ import javafx.stage.Stage;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
+import java.io.IOException;
+
 
 public class LoginWindowController extends BaseWindowController {
     // ids from the fxml file which will all be initialized once the scene has been loaded
@@ -20,24 +22,23 @@ public class LoginWindowController extends BaseWindowController {
     // constructor
     public LoginWindowController(String currentScene,
                                  String nextScene,
-                                 Stage stage,
-                                 GenericDisplayController genericDisplayController,
-                                 BaseWindowController currentObjectReference) {
-        super(currentScene, nextScene, stage, genericDisplayController, currentObjectReference);
+                                 Stage stage) {
+        super(currentScene, nextScene, stage);
         this.currentScene = currentScene;
         this.stage = stage;
-        this.genericDisplayController = genericDisplayController;
         this.nextScene = nextScene;
-        this.currentObjectReference = currentObjectReference;
     }
 
     @Override
-    public void changeScene() {
-
+    public void changeScene() throws IOException {
+        BaseWindowController currentObjectReference = new EmailWindowController("com/nodamin/emailapp/email_window.fxml",
+                "", this.stage).initializeScene(this.currentObjectReference);
+//        temp.initializeScene();
+//        currentObjectReference = temp;
     }
 
     @FXML
-    void login() {
-
+    void login() throws IOException{
+        changeScene();
     }
 }
