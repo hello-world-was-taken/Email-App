@@ -1,4 +1,11 @@
 package com.nodamin.emailapp.controller;
 
-public class EmailWindowController {
+import javafx.stage.Stage;
+
+public class EmailWindowController extends BaseWindowController {
+
+    // constructor
+    public EmailWindowController(String fxmlName, Stage stage) {
+        super(fxmlName, stage);
+    }
 }

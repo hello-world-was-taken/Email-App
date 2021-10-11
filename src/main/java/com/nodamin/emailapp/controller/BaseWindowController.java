@@ -12,20 +12,28 @@ public class BaseWindowController {
     String fxmlName = null;
     Stage stage = null;
 
+    // constructor
+
+
+    public BaseWindowController(String fxmlName, Stage stage) {
+        this.fxmlName = fxmlName;
+        this.stage = stage;
+    }
+
     // scene initializer
-    public void sceneInitializer(Stage stage, String string) {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(string));
+    public void initializeScene() {
+//        System.out.println(this.fxmlName);
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(this.fxmlName));
         fxmlLoader.setController(this);
-        Parent parent = null;
+        Scene scene;
         try{
-            parent = fxmlLoader.load();
+            scene = new Scene(fxmlLoader.load());
         }catch(IOException e) {
             System.out.println("Error loading scene! Check if file is corrupted or erred!");
             return;
         }
-        Scene scene = new Scene(parent);
-        stage.setTitle("Hello!");
-        stage.setScene(scene);
-        stage.show();
+        this.stage.setTitle("Hello!");
+        this.stage.setScene(scene);
+        this.stage.show();
     }
 }
