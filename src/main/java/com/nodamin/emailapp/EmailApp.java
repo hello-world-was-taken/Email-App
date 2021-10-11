@@ -18,7 +18,7 @@ public class EmailApp extends Application {
                 "/com/nodamin/emailapp/login_window.fxml",
                 "/com/nodamin/emailapp/email_window.fxml",
                 stage);
-        baseWindowController.initializeScene(baseWindowController);
+        baseWindowController.initializeScene();
 //
     }
 

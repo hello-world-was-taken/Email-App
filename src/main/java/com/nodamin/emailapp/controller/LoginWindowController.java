@@ -31,14 +31,19 @@ public class LoginWindowController extends BaseWindowController {
 
     @Override
     public void changeScene() throws IOException {
-        BaseWindowController currentObjectReference = new EmailWindowController("com/nodamin/emailapp/email_window.fxml",
-                "", this.stage).initializeScene(this.currentObjectReference);
-//        temp.initializeScene();
-//        currentObjectReference = temp;
+        BaseWindowController nextWindow = new EmailWindowController(nextScene,
+                currentScene, this.stage);
+        nextWindow.initializeScene();
     }
 
     @FXML
-    void login() throws IOException{
-        changeScene();
+    void login(){
+        try{
+            this.changeScene();
+        }catch(Exception e) {
+            e.printStackTrace();
+            return;
+        }
+
     }
 }

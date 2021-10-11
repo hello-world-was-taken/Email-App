@@ -26,11 +26,11 @@ public abstract class BaseWindowController {
     }
 
     // scene initializer
-    public BaseWindowController initializeScene(BaseWindowController currentObjectReference) throws IOException {
+    public void initializeScene() throws IOException {
         // getting the current objects reference
-        this.currentObjectReference = currentObjectReference;
+//        this.currentObjectReference = currentObjectReference;
         // log
-        System.out.println("initialize scene running...");
+        System.out.println("initializing " + currentScene + " scene...");
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(this.currentScene));
         fxmlLoader.setController(this);
@@ -38,7 +38,6 @@ public abstract class BaseWindowController {
         this.stage.setTitle("Hello!");
         this.stage.setScene(scene);
         this.stage.show();
-        return this;
     }
 
     public abstract void changeScene() throws IOException;
