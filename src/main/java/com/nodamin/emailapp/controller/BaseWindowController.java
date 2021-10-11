@@ -12,11 +12,16 @@ public abstract class BaseWindowController {
     protected String currentScene = null;
     protected Stage stage = null;
     protected GenericDisplayController genericDisplayController = null;
+    protected BaseWindowController currentObjectReference = null;
 
     // constructor
 
 
-    public BaseWindowController(String currentScene, String nextScene, Stage stage, GenericDisplayController genericDisplayController) {
+    public BaseWindowController(String currentScene,
+                                String nextScene,
+                                Stage stage,
+                                GenericDisplayController genericDisplayController,
+                                BaseWindowController currentObjectReference) {
         this.currentScene = currentScene;
         this.stage = stage;
         this.genericDisplayController = genericDisplayController;

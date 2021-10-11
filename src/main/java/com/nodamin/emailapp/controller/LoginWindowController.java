@@ -18,12 +18,17 @@ public class LoginWindowController extends BaseWindowController {
     private Button loginBtn;
 
     // constructor
-    public LoginWindowController(String currentScene, String nextScene, Stage stage, GenericDisplayController genericDisplayController) {
-        super(currentScene, nextScene, stage, genericDisplayController);
+    public LoginWindowController(String currentScene,
+                                 String nextScene,
+                                 Stage stage,
+                                 GenericDisplayController genericDisplayController,
+                                 BaseWindowController currentObjectReference) {
+        super(currentScene, nextScene, stage, genericDisplayController, currentObjectReference);
         this.currentScene = currentScene;
         this.stage = stage;
         this.genericDisplayController = genericDisplayController;
         this.nextScene = nextScene;
+        this.currentObjectReference = currentObjectReference;
     }
 
     @Override
