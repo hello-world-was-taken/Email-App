@@ -34,6 +34,7 @@ public class LoginWindowController extends BaseWindowController {
         BaseWindowController nextWindow = new EmailWindowController(nextScene,
                 currentScene, this.stage);
         nextWindow.initializeScene();
+        // TODO: NOT NULLIFYING THE REFERENCE, ONLY THE OBJECT
         currentObject = null;
     }
 

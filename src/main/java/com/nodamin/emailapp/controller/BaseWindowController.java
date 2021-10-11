@@ -35,6 +35,6 @@ public abstract class BaseWindowController {
         this.stage.setScene(scene);
         this.stage.show();
     }
- 
+
     public abstract void changeScene(BaseWindowController currentObject) throws IOException;
 }
