@@ -3,6 +3,8 @@ module com.nodamin.emailapp {
     requires javafx.fxml;
     requires javafx.base;
     requires javafx.graphics;
+    requires javafx.media;
+    requires javafx.web;
 
     opens com.nodamin.emailapp to javafx.fxml;
     exports com.nodamin.emailapp;
