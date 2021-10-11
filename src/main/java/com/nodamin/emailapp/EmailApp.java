@@ -14,8 +14,8 @@ public class EmailApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         stage.setResizable(false);
-        BaseWindowController baseWindowController = new LoginWindowController("/com/nodamin/emailapp/email_window.fxml", stage);
-        baseWindowController.initializeScene();
+//        BaseWindowController baseWindowController = new LoginWindowController("/com/nodamin/emailapp/login_window.fxml", stage);
+//        baseWindowController.initializeScene();
     }
 
     public static void main(String[] args) {
