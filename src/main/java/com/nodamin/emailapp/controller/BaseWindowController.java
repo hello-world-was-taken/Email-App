@@ -11,7 +11,6 @@ public abstract class BaseWindowController {
     protected String nextScene;
     protected String currentScene = null;
     protected Stage stage = null;
-    protected BaseWindowController currentObjectReference = null;
 
     // constructor
 
@@ -22,13 +21,10 @@ public abstract class BaseWindowController {
         this.currentScene = currentScene;
         this.stage = stage;
         this.nextScene = nextScene;
-//        this.currentObjectReference = currentObjectReference;
     }
 
     // scene initializer
     public void initializeScene() throws IOException {
-        // getting the current objects reference
-//        this.currentObjectReference = currentObjectReference;
         // log
         System.out.println("initializing " + currentScene + " scene...");
 
@@ -39,6 +35,6 @@ public abstract class BaseWindowController {
         this.stage.setScene(scene);
         this.stage.show();
     }
-
-    public abstract void changeScene() throws IOException;
+ 
+    public abstract void changeScene(BaseWindowController currentObject) throws IOException;
 }

@@ -17,7 +17,7 @@ public class EmailWindowController extends BaseWindowController {
     }
 
     @Override
-    public void changeScene() throws IOException {
+    public void changeScene(BaseWindowController currentObject) throws IOException {
 
     }
 }

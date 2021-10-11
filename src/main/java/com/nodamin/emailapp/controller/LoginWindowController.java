@@ -30,16 +30,17 @@ public class LoginWindowController extends BaseWindowController {
     }
 
     @Override
-    public void changeScene() throws IOException {
+    public void changeScene(BaseWindowController currentObject) throws IOException {
         BaseWindowController nextWindow = new EmailWindowController(nextScene,
                 currentScene, this.stage);
         nextWindow.initializeScene();
+        currentObject = null;
     }
 
     @FXML
     void login(){
         try{
-            this.changeScene();
+            this.changeScene(this);
         }catch(Exception e) {
             e.printStackTrace();
             return;
