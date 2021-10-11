@@ -5,6 +5,8 @@ module com.nodamin.emailapp {
     requires javafx.graphics;
     requires javafx.media;
     requires javafx.web;
+    requires activation;
+    requires java.mail;
 
     opens com.nodamin.emailapp to javafx.fxml;
     exports com.nodamin.emailapp;

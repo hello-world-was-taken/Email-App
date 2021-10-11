@@ -27,5 +27,6 @@
     <orderEntry type="library" name="javafx.web" level="project" />
     <orderEntry type="library" name="javafx.media" level="project" />
     <orderEntry type="library" name="bin" level="project" />
+    <orderEntry type="library" name="activation" level="project" />
   </component>
 </module>
