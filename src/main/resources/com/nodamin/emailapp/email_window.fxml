@@ -36,8 +36,9 @@
         <WebView fx:id="webView" layoutX="200.0" layoutY="256.0" minHeight="-1.0" minWidth="-1.0" prefHeight="250.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="250.0" />
       <TableView fx:id="emailTableView" layoutX="200.0" layoutY="48.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="250.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
         <columns>
-          <TableColumn prefWidth="75.0" text="C1" />
-          <TableColumn prefWidth="75.0" text="C2" />
+          <TableColumn fx:id="fromColumn" prefWidth="166.67" text="From" />
+          <TableColumn fx:id="subjectColumn" prefWidth="166.67" text="Subject" />
+            <TableColumn fx:id="dateColumn" prefWidth="166.7" text="Date" />
         </columns>
       </TableView>
     </children>

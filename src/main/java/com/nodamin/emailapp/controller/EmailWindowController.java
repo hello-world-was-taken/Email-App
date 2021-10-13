@@ -1,11 +1,12 @@
 package com.nodamin.emailapp.controller;
 
+import com.nodamin.emailapp.model.EmailContent;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
@@ -15,6 +16,7 @@ import javax.mail.MessagingException;
 import javax.mail.Store;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 
 public class EmailWindowController extends BaseWindowController {
 
@@ -26,10 +28,17 @@ public class EmailWindowController extends BaseWindowController {
     @FXML
     private WebView webView;
     @FXML
-    private TableView<?> emailTableView;
+    private TableView<EmailContent> emailTableView;
+    @FXML
+    private TableColumn<EmailContent, String> fromColumn;
+    @FXML
+    private TableColumn<EmailContent, String> subjectColumn;
+    @FXML
+    private TableColumn<EmailContent, Date> dateColumn;
 
     // non fxml fields
     Store store;
+    ObservableList<EmailContent> tableList = FXCollections.observableArrayList();
     // constructor
     public EmailWindowController(String currentScene,
                                  String nextScene,
@@ -67,7 +76,30 @@ public class EmailWindowController extends BaseWindowController {
                 // if it is a type Folder.HOLDS_FOLDERS, it will have list() method which returns array of folders
                 bindFolderName(folder.list(), folderTreeItem);
             }
+            displayMessageToTable(folder);
         }
+    }
+
+    private void displayMessageToTable(Folder folder) throws MessagingException {
+        if(folder.getType() != Folder.HOLDS_FOLDERS) {
+            folder.open(Folder.READ_WRITE);
+        } else {
+            return;
+        }
+        Message[] messages = folder.getMessages();
+        for(Message message: messages) {
+            EmailContent emailContent = new EmailContent(Arrays.toString(message.getFrom()),
+                    message.getSubject(), message.getSentDate());
+            tableList.add(emailContent);
+        }
+        emailTableView.setItems(tableList);
+    }
+
+    // sets the property value factories for the columns
+    public void prepareTableColumns() {
+        this.fromColumn.setCellValueFactory(new PropertyValueFactory<EmailContent, String>("From"));
+        this.subjectColumn.setCellValueFactory(new PropertyValueFactory<EmailContent, String>("Subject"));
+        this.dateColumn.setCellValueFactory(new PropertyValueFactory<EmailContent, Date>("DateSent"));
     }
 
     @Override

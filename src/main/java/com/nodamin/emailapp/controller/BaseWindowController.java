@@ -9,8 +9,8 @@ import java.io.IOException;
 public abstract class BaseWindowController {
     // initializing values to be used across the subclasses
     protected String nextScene;
-    protected String currentScene = null;
-    protected Stage stage = null;
+    protected String currentScene;
+    protected Stage stage;
 
     // constructor
 
@@ -37,4 +37,7 @@ public abstract class BaseWindowController {
     }
 
     public abstract void changeScene(BaseWindowController currentObject) throws IOException;
+    public void prepareTableColumns() {
+
+    }
 }

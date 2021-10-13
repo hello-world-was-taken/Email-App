@@ -9,6 +9,7 @@ module com.nodamin.emailapp {
     requires java.mail;
 
     opens com.nodamin.emailapp to javafx.fxml;
+    opens com.nodamin.emailapp.model;
     exports com.nodamin.emailapp;
     exports com.nodamin.emailapp.controller;
     opens com.nodamin.emailapp.controller to javafx.fxml;

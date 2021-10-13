@@ -41,7 +41,7 @@ public class LoginWindowController extends BaseWindowController {
             BaseWindowController nextWindow = new EmailWindowController(nextScene,
                     currentScene, this.stage, getStore(this.usernameTextField.getText(), this.passwordTextField.getText()));
             nextWindow.initializeScene();
-
+            nextWindow.prepareTableColumns();
         }catch (IOException e){
             System.out.println("Inside the change scene function");
         }
