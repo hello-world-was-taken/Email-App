@@ -7,7 +7,10 @@ import javafx.stage.Stage;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
+import javax.mail.*;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Properties;
 
 
 public class LoginWindowController extends BaseWindowController {
@@ -47,5 +50,47 @@ public class LoginWindowController extends BaseWindowController {
             return;
         }
 
+    }
+
+    // Get the messages
+    public Store getStore(String userName, String password) {
+
+        Properties properties = new Properties();
+        properties.put("incomingHost", "imap.gmail.com");
+        properties.put("mail.store.protocol", "imaps");
+        properties.put("mail.transport.protocol", "smtp");
+        properties.put("mail.smtps.host", "smtps.gmail.com");
+        properties.put("mail.smtps.auth", "true");
+        properties.put("outgoingHost", "smtp.gmail.com");
+
+//        Authenticator authenticator = new Authenticator() {
+//            @Override
+//            protected PasswordAuthentication getPasswordAuthentication() {
+//                PasswordAuthentication pa = new PasswordAuthentication("masreshatebabal18@gmail.com", "tanahaik2011");
+//                return pa;
+//            }
+//        };
+
+        Session session = Session.getDefaultInstance(properties);
+        Store store = null;
+        try{
+            store = session.getStore("imaps");
+            store.connect("imap.gmail.com","hagosabel34@gmail.com", "best21@mine");
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_ONLY);
+            Message[] messages = folder.getMessages();
+
+//            for(Message message: messages) {
+//                System.out.println("FROM: " + Arrays.toString(message.getFrom()));
+//                System.out.println("SUBJECT: " + message.getSubject().toString());
+//                System.out.println("CONTENT" + message.getContent());
+//                break;
+//            }
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            System.out.println("Message not found!");
+        }
+        
+        return store;
     }
 }
