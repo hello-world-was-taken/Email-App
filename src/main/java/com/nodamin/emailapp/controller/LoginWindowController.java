@@ -82,7 +82,7 @@ public class LoginWindowController extends BaseWindowController {
         Session session = Session.getDefaultInstance(properties);
         try{
             store = session.getStore("imaps");
-            store.connect("imap.gmail.com","hagosabel34@gmail.com", "best21@mine");
+            store.connect("imap.gmail.com",userName, password);
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_ONLY);
             Message[] messages = folder.getMessages();

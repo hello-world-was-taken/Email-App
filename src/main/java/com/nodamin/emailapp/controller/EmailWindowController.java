@@ -44,23 +44,29 @@ public class EmailWindowController extends BaseWindowController {
 
     @Override
     public void changeScene(BaseWindowController currentObject) throws IOException {
-
+        throw new IOException("An implemented change scene method in EmailWindowController");
     }
 
     public void presentData(Store store) {
         try {
-            Folder folder = store.getFolder("INBOX");
-//            Message[] message = folder.getMessages();
-            folder.open(Folder.READ_ONLY);
-            System.out.println(folder.getName());
-            TreeItem<String> folderTreeItem = new TreeItem<String>(folder.getName());
+            Folder[] folders = store.getDefaultFolder().list();
             TreeItem<String> root = new TreeItem<>("Emails");
-            root.getChildren().add(folderTreeItem);
             this.emailFolderTreeView.setRoot(root);
-
-        } catch (MessagingException e) {
+            bindFolderName(folders, root);
+        } catch (Exception e) {
             e.printStackTrace();
-//            System.out.println("WHAT");
+        }
+    }
+
+    // bind the name of the tree items to the tree view
+    private void bindFolderName(Folder[] folders, TreeItem<String> root) throws Exception {
+        for(Folder folder: folders) {
+            TreeItem<String> folderTreeItem = new TreeItem<>(folder.getName());
+            root.getChildren().add(folderTreeItem);
+            if(folder.getType() == Folder.HOLDS_FOLDERS) {
+                // if it is a type Folder.HOLDS_FOLDERS, it will have list() method which returns array of folders
+                bindFolderName(folder.list(), folderTreeItem);
+            }
         }
     }
 
