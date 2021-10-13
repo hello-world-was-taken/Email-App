@@ -22,6 +22,9 @@ public class LoginWindowController extends BaseWindowController {
     @FXML
     private Button loginBtn;
 
+    // non fxml fields
+    Store store = null;
+
     // constructor
     public LoginWindowController(String currentScene,
                                  String nextScene,
@@ -33,12 +36,17 @@ public class LoginWindowController extends BaseWindowController {
     }
 
     @Override
-    public void changeScene(BaseWindowController currentObject) throws IOException {
-        BaseWindowController nextWindow = new EmailWindowController(nextScene,
-                currentScene, this.stage);
-        nextWindow.initializeScene();
+    public void changeScene(BaseWindowController currentObject) {
+        try {
+            BaseWindowController nextWindow = new EmailWindowController(nextScene,
+                    currentScene, this.stage, getStore(this.usernameTextField.getText(), this.passwordTextField.getText()));
+            nextWindow.initializeScene();
+
+        }catch (IOException e){
+            System.out.println("Inside the change scene function");
+        }
         // TODO: NOT NULLIFYING THE REFERENCE, ONLY THE OBJECT
-        currentObject = null;
+//        currentObject = null;
     }
 
     @FXML
@@ -47,7 +55,7 @@ public class LoginWindowController extends BaseWindowController {
             this.changeScene(this);
         }catch(Exception e) {
             e.printStackTrace();
-            return;
+            System.out.println("AUTHENTICATION ERROR!");
         }
 
     }
@@ -72,7 +80,6 @@ public class LoginWindowController extends BaseWindowController {
 //        };
 
         Session session = Session.getDefaultInstance(properties);
-        Store store = null;
         try{
             store = session.getStore("imaps");
             store.connect("imap.gmail.com","hagosabel34@gmail.com", "best21@mine");
