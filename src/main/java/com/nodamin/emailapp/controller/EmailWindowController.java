@@ -59,13 +59,18 @@ public class EmailWindowController extends BaseWindowController {
     public void changeScene(BaseWindowController currentObject) throws IOException {
         throw new IOException("An implemented change scene method in EmailWindowController");
     }
+    public TreeItem<String> setTreeRoot() {
+        TreeItem<String> root = new TreeItem<>("Emails");
+        this.emailFolderTreeView.setRoot(root);
+        return  root;
+    }
 
-    public void presentData(Store store) {
+    public void presentData(Store store, TreeItem<String> root) {
         try {
             System.out.println("presentData()");
             Folder[] folders = store.getDefaultFolder().list();
-            TreeItem<String> root = new TreeItem<>("Emails");
-            this.emailFolderTreeView.setRoot(root);
+//            TreeItem<String> root = new TreeItem<>("Emails");
+//            this.emailFolderTreeView.setRoot(root);
             bindFolderName(folders, root);
         } catch (Exception e) {
             e.printStackTrace();
@@ -118,7 +123,9 @@ public class EmailWindowController extends BaseWindowController {
     @Override
     public void initializeScene() throws IOException {
         super.initializeScene();
-        presentData(this.store);
+        System.out.println("initializeScene()");
+        TreeItem<String> root = setTreeRoot();
+        presentData(this.store, root);
     }
 
 
@@ -142,4 +149,18 @@ public class EmailWindowController extends BaseWindowController {
             return tableList;
         }
     }
+
+//    class ImplementMajorWork extends Task<> {
+//
+//        Store store;
+//
+//        public ImplementMajorWork(Store store) {
+//            this.store = store;
+//        }
+//
+//        @Override
+//        protected Object call() throws Exception {
+//
+//        }
+//    }
 }
