@@ -1,8 +1,11 @@
 package com.nodamin.emailapp.controller;
 
 import com.nodamin.emailapp.model.EmailContent;
+import javafx.beans.binding.ObjectExpression;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -45,6 +48,7 @@ public class EmailWindowController extends BaseWindowController {
                                  Stage stage,
                                  Store store) {
         super(currentScene, nextScene, stage);
+        System.out.println("EmailWindowController()");
         this.currentScene = currentScene;
         this.stage = stage;
         this.nextScene = nextScene;
@@ -58,6 +62,7 @@ public class EmailWindowController extends BaseWindowController {
 
     public void presentData(Store store) {
         try {
+            System.out.println("presentData()");
             Folder[] folders = store.getDefaultFolder().list();
             TreeItem<String> root = new TreeItem<>("Emails");
             this.emailFolderTreeView.setRoot(root);
@@ -70,6 +75,7 @@ public class EmailWindowController extends BaseWindowController {
     // bind the name of the tree items to the tree view
     private void bindFolderName(Folder[] folders, TreeItem<String> root) throws Exception {
         for(Folder folder: folders) {
+            System.out.println("bindFolderName()");
             TreeItem<String> folderTreeItem = new TreeItem<>(folder.getName());
             root.getChildren().add(folderTreeItem);
             if(folder.getType() == Folder.HOLDS_FOLDERS) {
@@ -82,16 +88,23 @@ public class EmailWindowController extends BaseWindowController {
 
     private void displayMessageToTable(Folder folder) throws MessagingException {
         if(folder.getType() != Folder.HOLDS_FOLDERS) {
+            System.out.println("displayMesasgesToTable()");
             folder.open(Folder.READ_WRITE);
         } else {
             return;
         }
+
+        // TODO: IMPLEMENT A THREAD
         Message[] messages = folder.getMessages();
-        for(Message message: messages) {
-            EmailContent emailContent = new EmailContent(Arrays.toString(message.getFrom()),
-                    message.getSubject(), message.getSentDate());
-            tableList.add(emailContent);
-        }
+//        for(Message message: messages) {
+//            EmailContent emailContent = new EmailContent(Arrays.toString(message.getFrom()),
+//                    message.getSubject(), message.getSentDate());
+//            tableList.add(emailContent);
+//        }
+        ImplementTask implementTask = new ImplementTask(messages, this.tableList);
+        Thread collectMail = new Thread(implementTask);
+        collectMail.start();
+        implementTask.setOnSucceeded(e -> tableList = implementTask.getValue());
         emailTableView.setItems(tableList);
     }
 
@@ -106,5 +119,27 @@ public class EmailWindowController extends BaseWindowController {
     public void initializeScene() throws IOException {
         super.initializeScene();
         presentData(this.store);
+    }
+
+
+    private class ImplementTask extends Task<ObservableList<EmailContent>> {
+        Message [] messages;
+        ObservableList<EmailContent> tableList;
+        public ImplementTask(Message [] messages, ObservableList<EmailContent> tableList) {
+            this.messages = messages;
+            this.tableList = tableList;
+        }
+
+        @Override
+        protected ObservableList<EmailContent> call() throws Exception {
+            System.out.println("Inside call()");
+            for(Message message: messages) {
+                EmailContent emailContent = new EmailContent(Arrays.toString(message.getFrom()),
+                        message.getSubject(), message.getSentDate());
+                this.tableList.add(emailContent);
+            }
+            System.out.println(tableList.isEmpty());
+            return tableList;
+        }
     }
 }
