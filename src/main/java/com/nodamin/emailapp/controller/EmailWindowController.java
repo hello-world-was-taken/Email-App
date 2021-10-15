@@ -40,6 +40,7 @@ public class EmailWindowController extends BaseWindowController {
     Store store;
     ObservableList<EmailContent> tableList = FXCollections.observableArrayList();
     Folder[] folders;
+    TreeItem<String> treeItem;
     // constructor
     public EmailWindowController(String currentScene,
                                  String nextScene,
@@ -58,6 +59,10 @@ public class EmailWindowController extends BaseWindowController {
         if(folders == null) {
             System.out.println("WTF");
         }
+    }
+
+    public void setTreeView(TreeItem<String> tr) {
+        this.treeItem = tr;
     }
 
     @Override
@@ -92,7 +97,7 @@ public class EmailWindowController extends BaseWindowController {
                 // if it is a type Folder.HOLDS_FOLDERS, it will have list() method which returns array of folders
                 bindFolderName(folder.list(), folderTreeItem);
             }
-            displayMessageToTable(folder);
+//            displayMessageToTable(folder);
         }
     }
 
@@ -135,8 +140,15 @@ public class EmailWindowController extends BaseWindowController {
         try {
             setFolders();
             System.out.println("Before the bindFolderName");
-            bindFolderName(this.folders, root);
-            System.out.println("After the bindFolderName");
+
+            //NEW THREAD TO BIND THE FOLDERS
+            BindFolderToTreeView bd = new BindFolderToTreeView(this.folders, root);
+            Thread bindFolderToTree = new Thread(bd, "bindFolderToTree");
+            bindFolderToTree.start();
+            bd.setOnSucceeded(e-> {
+                this.treeItem = bd.getValue();
+            });
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -161,6 +173,36 @@ public class EmailWindowController extends BaseWindowController {
             }
             System.out.println(tableList.isEmpty());
             return tableList;
+        }
+    }
+
+    private class BindFolderToTreeView extends Task<TreeItem<String>> {
+        Folder[] folders;
+        TreeItem<String> root;
+
+        public BindFolderToTreeView(Folder[] folders, TreeItem<String> root) {
+            this.folders = folders;
+            this.root = root;
+        }
+
+        private TreeItem<String> bindFolderNameInner(Folder[] folders, TreeItem<String> root) throws MessagingException {
+            for(Folder folder: folders) {
+                System.out.println("bindFolderName() HELLO");
+                TreeItem<String> folderTreeItem = new TreeItem<>(folder.getName());
+                root.getChildren().add(folderTreeItem);
+                if(folder.getType() == Folder.HOLDS_FOLDERS) {
+                    // if it is a type Folder.HOLDS_FOLDERS, it will have list() method which returns array of folders
+                    bindFolderNameInner(folder.list(), folderTreeItem);
+                }
+//            displayMessageToTable(folder);
+            }
+            return root;
+        }
+
+        @Override
+        protected TreeItem<String> call() throws Exception {
+           return bindFolderNameInner(this.folders, this.root);
+//            return null;
         }
     }
 }

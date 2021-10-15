@@ -1,5 +1,6 @@
 package com.nodamin.emailapp.controller;
 
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -50,9 +51,10 @@ public class LoginWindowController extends BaseWindowController {
     }
 
     @FXML
-    void login(){
+    void login() {
         try{
-            this.changeScene(this);
+//            this.changeScene(this);
+            this.getStore(this.usernameTextField.getText(), this.passwordTextField.getText());
         }catch(Exception e) {
             e.printStackTrace();
             System.out.println("AUTHENTICATION ERROR!");
@@ -63,41 +65,93 @@ public class LoginWindowController extends BaseWindowController {
     // Get the messages
     public Store getStore(String userName, String password) {
 
-        Properties properties = new Properties();
-        properties.put("incomingHost", "imap.gmail.com");
-        properties.put("mail.store.protocol", "imaps");
-        properties.put("mail.transport.protocol", "smtp");
-        properties.put("mail.smtps.host", "smtps.gmail.com");
-        properties.put("mail.smtps.auth", "true");
-        properties.put("outgoingHost", "smtp.gmail.com");
+//        Properties properties = new Properties();
+//        properties.put("incomingHost", "imap.gmail.com");
+//        properties.put("mail.store.protocol", "imaps");
+//        properties.put("mail.transport.protocol", "smtp");
+//        properties.put("mail.smtps.host", "smtps.gmail.com");
+//        properties.put("mail.smtps.auth", "true");
+//        properties.put("outgoingHost", "smtp.gmail.com");
+//
+////        Authenticator authenticator = new Authenticator() {
+////            @Override
+////            protected PasswordAuthentication getPasswordAuthentication() {
+////                PasswordAuthentication pa = new PasswordAuthentication("masreshatebabal18@gmail.com", "tanahaik2011");
+////                return pa;
+////            }
+////        };
+//
+//        Session session = Session.getDefaultInstance(properties);
+//        try{
+//            store = session.getStore("imaps");
+//            store.connect("imap.gmail.com",userName, password);
+//            Folder folder = store.getFolder("INBOX");
+//            folder.open(Folder.READ_ONLY);
+//            Message[] messages = folder.getMessages();
+//
+////            for(Message message: messages) {
+////                System.out.println("FROM: " + Arrays.toString(message.getFrom()));
+////                System.out.println("SUBJECT: " + message.getSubject().toString());
+////                System.out.println("CONTENT" + message.getContent());
+////                break;
+////            }
+//        } catch (MessagingException e) {
+//            e.printStackTrace();
+//            System.out.println("Message not found!");
+//        }
+//
+//        return store;
+        GetStore getStore = new GetStore(userName, password);
+        Thread getStoreThread = new Thread(getStore);
+        getStoreThread.start();
+        getStore.setOnRunning(e-> System.out.println("it is running"));
+        getStore.setOnSucceeded(e -> {
+            this.store = getStore.getValue();
+            if(this.store == null) {
+                System.out.println("Null value returned on succeeded");
+            }else{
+                System.out.println("NOT NULL");
+            }
+            this.changeScene(this);
+//            return this.store;
+        });
+//        if(this.store == null) {
+//            System.out.println("Something is wrong");
+//        }
+        return this.store;
+    }
 
-//        Authenticator authenticator = new Authenticator() {
-//            @Override
-//            protected PasswordAuthentication getPasswordAuthentication() {
-//                PasswordAuthentication pa = new PasswordAuthentication("masreshatebabal18@gmail.com", "tanahaik2011");
-//                return pa;
-//            }
-//        };
+    private class GetStore extends Task<Store> {
+        String userName;
+        String password;
+        Store innerStore;
 
-        Session session = Session.getDefaultInstance(properties);
-        try{
-            store = session.getStore("imaps");
-            store.connect("imap.gmail.com",userName, password);
-            Folder folder = store.getFolder("INBOX");
-            folder.open(Folder.READ_ONLY);
-            Message[] messages = folder.getMessages();
-
-//            for(Message message: messages) {
-//                System.out.println("FROM: " + Arrays.toString(message.getFrom()));
-//                System.out.println("SUBJECT: " + message.getSubject().toString());
-//                System.out.println("CONTENT" + message.getContent());
-//                break;
-//            }
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            System.out.println("Message not found!");
+        public GetStore(String userName, String password) {
+            this.userName = userName;
+            this.password = password;
         }
-        
-        return store;
+
+        @Override
+        protected Store call() throws Exception {
+            Properties properties = new Properties();
+            properties.put("incomingHost", "imap.gmail.com");
+            properties.put("mail.store.protocol", "imaps");
+            properties.put("mail.transport.protocol", "smtp");
+            properties.put("mail.smtps.host", "smtps.gmail.com");
+            properties.put("mail.smtps.auth", "true");
+            properties.put("outgoingHost", "smtp.gmail.com");
+
+            Session session = Session.getDefaultInstance(properties);
+            try{
+                innerStore = session.getStore("imaps");
+                innerStore.connect("imap.gmail.com", this.userName, this.password);
+
+            } catch (MessagingException e) {
+                e.printStackTrace();
+                System.out.println("Message not found!");
+            }
+
+            return innerStore;
+        }
     }
 }
