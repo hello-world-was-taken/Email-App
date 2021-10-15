@@ -1,13 +1,10 @@
 package com.nodamin.emailapp.controller;
 
 import com.nodamin.emailapp.model.EmailContent;
-import javafx.beans.binding.ObjectExpression;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.web.WebView;
@@ -42,6 +39,7 @@ public class EmailWindowController extends BaseWindowController {
     // non fxml fields
     Store store;
     ObservableList<EmailContent> tableList = FXCollections.observableArrayList();
+    Folder[] folders;
     // constructor
     public EmailWindowController(String currentScene,
                                  String nextScene,
@@ -55,6 +53,13 @@ public class EmailWindowController extends BaseWindowController {
         this.store = store;
     }
 
+    public void setFolders() throws Exception{
+        this.folders = store.getDefaultFolder().list();
+        if(folders == null) {
+            System.out.println("WTF");
+        }
+    }
+
     @Override
     public void changeScene(BaseWindowController currentObject) throws IOException {
         throw new IOException("An implemented change scene method in EmailWindowController");
@@ -65,17 +70,17 @@ public class EmailWindowController extends BaseWindowController {
         return  root;
     }
 
-    public void presentData(Store store, TreeItem<String> root) {
-        try {
-            System.out.println("presentData()");
-            Folder[] folders = store.getDefaultFolder().list();
-//            TreeItem<String> root = new TreeItem<>("Emails");
-//            this.emailFolderTreeView.setRoot(root);
-            bindFolderName(folders, root);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    public void presentData(Store store, TreeItem<String> root) {
+//        try {
+//            System.out.println("presentData()");
+//            Folder[] folders = store.getDefaultFolder().list();
+////            TreeItem<String> root = new TreeItem<>("Emails");
+////            this.emailFolderTreeView.setRoot(root);
+//            bindFolderName(folders, root);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     // bind the name of the tree items to the tree view
     private void bindFolderName(Folder[] folders, TreeItem<String> root) throws Exception {
@@ -106,10 +111,10 @@ public class EmailWindowController extends BaseWindowController {
 //                    message.getSubject(), message.getSentDate());
 //            tableList.add(emailContent);
 //        }
-        ImplementTask implementTask = new ImplementTask(messages, this.tableList);
-        Thread collectMail = new Thread(implementTask);
+        GetObservableTableItems getObservableTableItems = new GetObservableTableItems(messages, this.tableList);
+        Thread collectMail = new Thread(getObservableTableItems, "collectMail");
         collectMail.start();
-        implementTask.setOnSucceeded(e -> tableList = implementTask.getValue());
+        getObservableTableItems.setOnSucceeded(e -> tableList = getObservableTableItems.getValue());
         emailTableView.setItems(tableList);
     }
 
@@ -124,15 +129,24 @@ public class EmailWindowController extends BaseWindowController {
     public void initializeScene() throws IOException {
         super.initializeScene();
         System.out.println("initializeScene()");
+
+        // getting a reference to the root set to the TREEVIEW which shows the email folders
         TreeItem<String> root = setTreeRoot();
-        presentData(this.store, root);
+        try {
+            setFolders();
+            System.out.println("Before the bindFolderName");
+            bindFolderName(this.folders, root);
+            System.out.println("After the bindFolderName");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
-    private class ImplementTask extends Task<ObservableList<EmailContent>> {
+    private class GetObservableTableItems extends Task<ObservableList<EmailContent>> {
         Message [] messages;
         ObservableList<EmailContent> tableList;
-        public ImplementTask(Message [] messages, ObservableList<EmailContent> tableList) {
+        public GetObservableTableItems(Message [] messages, ObservableList<EmailContent> tableList) {
             this.messages = messages;
             this.tableList = tableList;
         }
@@ -149,18 +163,4 @@ public class EmailWindowController extends BaseWindowController {
             return tableList;
         }
     }
-
-//    class ImplementMajorWork extends Task<> {
-//
-//        Store store;
-//
-//        public ImplementMajorWork(Store store) {
-//            this.store = store;
-//        }
-//
-//        @Override
-//        protected Object call() throws Exception {
-//
-//        }
-//    }
 }
