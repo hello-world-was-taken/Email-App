@@ -63,7 +63,6 @@ public class LoginWindowController extends BaseWindowController {
 
     // Get the messages
     public Store getStore(String userName, String password) {
-
         GetStore getStore = new GetStore(userName, password);
         Thread getStoreThread = new Thread(getStore);
         getStoreThread.start();

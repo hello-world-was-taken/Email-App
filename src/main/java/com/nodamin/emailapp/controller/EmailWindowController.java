@@ -17,6 +17,7 @@ import javax.mail.Store;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 
 public class EmailWindowController extends BaseWindowController {
 
@@ -56,9 +57,6 @@ public class EmailWindowController extends BaseWindowController {
 
     public void setFolders() throws Exception{
         this.folders = store.getDefaultFolder().list();
-        if(folders == null) {
-            System.out.println("WTF");
-        }
     }
 
     public void setTreeView(TreeItem<String> tr) {
@@ -69,58 +67,63 @@ public class EmailWindowController extends BaseWindowController {
     public void changeScene(BaseWindowController currentObject) throws IOException {
         throw new IOException("An implemented change scene method in EmailWindowController");
     }
+
+    // one time functions
     public TreeItem<String> setTreeRoot() {
         TreeItem<String> root = new TreeItem<>("Emails");
         this.emailFolderTreeView.setRoot(root);
         return  root;
     }
 
-//    public void presentData(Store store, TreeItem<String> root) {
-//        try {
-//            System.out.println("presentData()");
-//            Folder[] folders = store.getDefaultFolder().list();
-////            TreeItem<String> root = new TreeItem<>("Emails");
-////            this.emailFolderTreeView.setRoot(root);
-//            bindFolderName(folders, root);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    // bind the name of the tree items to the tree view
-    private void bindFolderName(Folder[] folders, TreeItem<String> root) throws Exception {
+    private ObservableList<EmailContent> returnEachFolder(Folder[] folders) throws MessagingException {
         for(Folder folder: folders) {
-            System.out.println("bindFolderName()");
-            TreeItem<String> folderTreeItem = new TreeItem<>(folder.getName());
-            root.getChildren().add(folderTreeItem);
             if(folder.getType() == Folder.HOLDS_FOLDERS) {
-                // if it is a type Folder.HOLDS_FOLDERS, it will have list() method which returns array of folders
-                bindFolderName(folder.list(), folderTreeItem);
+                returnEachFolder(folder.list());
             }
-//            displayMessageToTable(folder);
+//            displayPartialMessage(folder.getName());
+            if(folder.getType() != Folder.HOLDS_FOLDERS) {
+                folder.open(Folder.READ_WRITE);
+            }else {
+                System.out.println("THIS FOLDER IS NOT OPENED" + folder.getName());
+            }
+            Message[] messages = folder.getMessages();
+
+            //  NEW THREAD THAT RETURNS A TABLE LIST FOR EACH MESSAGE ON THE CURRENT FOLDER
+            GetObservableTableItems getObservableTableItems = new GetObservableTableItems(messages, this.tableList);
+            Thread collectMail = new Thread(getObservableTableItems, "collectMail");
+            collectMail.start();
+            getObservableTableItems.setOnSucceeded(e -> this.tableList = getObservableTableItems.getValue());
+            getObservableTableItems.setOnRunning(e-> System.out.println("collect mail running..."));
+            if(this.tableList.isEmpty()) {
+                System.out.println("EMPTY");
+            }else {
+                System.out.println("NOT EMPTY");
+            }
+            emailTableView.setItems(tableList);
+            return this.tableList;
         }
+        return this.tableList;
     }
 
-    private void displayMessageToTable(Folder folder) throws MessagingException {
+    private ObservableList<EmailContent> displayPartialMessage(String folderName) throws MessagingException {
+        System.out.println("HERE IS THE ERROR" + ": " + folderName);
+        Folder folder = this.store.getFolder(folderName);
         if(folder.getType() != Folder.HOLDS_FOLDERS) {
-            System.out.println("displayMesasgesToTable()");
             folder.open(Folder.READ_WRITE);
-        } else {
-            return;
+        }else {
+            System.out.println("THIS FOLDER IS NOT OPENED" + folderName);
         }
-
-        // TODO: IMPLEMENT A THREAD
         Message[] messages = folder.getMessages();
-//        for(Message message: messages) {
-//            EmailContent emailContent = new EmailContent(Arrays.toString(message.getFrom()),
-//                    message.getSubject(), message.getSentDate());
-//            tableList.add(emailContent);
-//        }
+
+        //  NEW THREAD THAT RETURNS A TABLE LIST FOR EACH MESSAGE ON THE CURRENT FOLDER
         GetObservableTableItems getObservableTableItems = new GetObservableTableItems(messages, this.tableList);
         Thread collectMail = new Thread(getObservableTableItems, "collectMail");
         collectMail.start();
-        getObservableTableItems.setOnSucceeded(e -> tableList = getObservableTableItems.getValue());
+        getObservableTableItems.setOnSucceeded(e -> this.tableList = getObservableTableItems.getValue());
+        getObservableTableItems.setOnRunning(e-> System.out.println("collect mail running..."));
         emailTableView.setItems(tableList);
+//        tableList.clear();
+        return this.tableList;
     }
 
     // sets the property value factories for the columns
@@ -130,31 +133,40 @@ public class EmailWindowController extends BaseWindowController {
         this.dateColumn.setCellValueFactory(new PropertyValueFactory<EmailContent, Date>("DateSent"));
     }
 
+    // initializes and displays the emails
     @Override
     public void initializeScene() throws IOException {
         super.initializeScene();
         System.out.println("initializeScene()");
 
-        // getting a reference to the root set to the TREEVIEW which shows the email folders
+        // getting a reference to the root set to the TreeView which shows the email folders
         TreeItem<String> root = setTreeRoot();
         try {
             setFolders();
-            System.out.println("Before the bindFolderName");
-
             //NEW THREAD TO BIND THE FOLDERS
             BindFolderToTreeView bd = new BindFolderToTreeView(this.folders, root);
             Thread bindFolderToTree = new Thread(bd, "bindFolderToTree");
             bindFolderToTree.start();
             bd.setOnSucceeded(e-> {
                 this.treeItem = bd.getValue();
+                // this thread must firs finish since we use the tree items in the coming thread
+                try {
+                    returnEachFolder(this.store.getDefaultFolder().list());
+                } catch (MessagingException ex) {
+                    ex.printStackTrace();
+                }
             });
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
+    /**
+     * By iterating through each of the messages in the folder that was passed in, it will populate the object's
+     * observable list (which is used to populate the Table view) with the Email Content objects. These objects are
+     * the once that the tree item's property value factory use.
+     */
     private class GetObservableTableItems extends Task<ObservableList<EmailContent>> {
         Message [] messages;
         ObservableList<EmailContent> tableList;
@@ -171,11 +183,13 @@ public class EmailWindowController extends BaseWindowController {
                         message.getSubject(), message.getSentDate());
                 this.tableList.add(emailContent);
             }
-            System.out.println(tableList.isEmpty());
             return tableList;
         }
     }
 
+    /**
+     * By taking the folder that was passed, it will populate the Tree View with the name of each folder
+     */
     private class BindFolderToTreeView extends Task<TreeItem<String>> {
         Folder[] folders;
         TreeItem<String> root;
@@ -187,7 +201,6 @@ public class EmailWindowController extends BaseWindowController {
 
         private TreeItem<String> bindFolderNameInner(Folder[] folders, TreeItem<String> root) throws MessagingException {
             for(Folder folder: folders) {
-                System.out.println("bindFolderName() HELLO");
                 TreeItem<String> folderTreeItem = new TreeItem<>(folder.getName());
                 root.getChildren().add(folderTreeItem);
                 if(folder.getType() == Folder.HOLDS_FOLDERS) {
